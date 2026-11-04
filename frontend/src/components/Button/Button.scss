@@ -1,0 +1,40 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 32px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  height: 40px;
+
+  &:disabled {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  &.btn-blue {
+    background-color: var(--TBlue);
+    color: var(--TWhite);
+
+    &:hover {
+      box-shadow: 0 0 0 2px var(--TBlue);
+    }
+  }
+
+  &.btn-outline {
+    background-color: transparent;
+    color: var(--TWhite);
+    border: 1px solid var(--TWhite);
+
+    &:hover {
+      box-shadow: 0 0 0 2px var(--TWhite);
+    }
+  }
+
+  @media (max-width: 600px) {
+    height: 36px;
+  }
+}
