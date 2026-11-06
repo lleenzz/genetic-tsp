@@ -129,6 +129,7 @@ def genetic_algorithm(
     best_route = min(population, key=lambda r: route_length(r, cities))
     best_length = route_length(best_route, cities)
     history = []
+    route_history = []
 
     for gen in range(generations):
 
@@ -155,5 +156,6 @@ def genetic_algorithm(
             best_route = gen_best
 
         history.append(best_length)
+        route_history.append(gen_best)
 
-    return best_route, best_length, history
+    return best_route, best_length, history, route_history

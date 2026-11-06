@@ -7,64 +7,88 @@ export const TSPVisualizer = ({
   onCanvasClick,
   width = 800,
   height = 600,
-  gridStep = 40,
 }) => {
   const [hoveredSegment, setHoveredSegment] = useState(null);
   const [selectedCityId, setSelectedCityId] = useState(null);
 
-  const originX = gridStep;
-  const originY = height - gridStep;
+  const gridMax = 100;
+  const padding = 60;
+
+  const graphWidth = width - padding * 2;
+  const graphHeight = height - padding * 2;
+
+  const normalizedCities = useMemo(() => {
+    if (!cities.length) return [];
+
+    let minX = Infinity, maxX = -Infinity;
+    let minY = Infinity, maxY = -Infinity;
+
+    cities.forEach((c) => {
+      if (c.x < minX) minX = c.x;
+      if (c.x > maxX) maxX = c.x;
+      if (c.y < minY) minY = c.y;
+      if (c.y > maxY) maxY = c.y;
+    });
+
+    const rangeX = maxX - minX || 1;
+    const rangeY = maxY - minY || 1;
+
+    return cities.map((c) => ({
+      ...c,
+      gridX: ((c.x - minX) / rangeX) * 80 + 10,
+      gridY: ((c.y - minY) / rangeY) * 80 + 10,
+      originalX: c.x,
+      originalY: c.y,
+    }));
+  }, [cities]);
+
+  const scaleX = (x) => padding + (x / gridMax) * graphWidth;
+  const scaleY = (y) => height - padding - (y / gridMax) * graphHeight;
+
+  const originX = scaleX(0);
+  const originY = scaleY(0);
 
   const { gridLines, axisLines, axisLabels } = useMemo(() => {
     const lines = [];
     const labels = [];
+    const step = 10;
 
-    for (let x = gridStep; x < width; x += gridStep) {
-      lines.push(
-        <line
-          key={`v-${x}`}
-          x1={x}
-          y1={0}
-          x2={x}
-          y2={height}
-          className="tsp-visualizer__grid-line"
-        />
-      );
-      if (x % 80 === 0 && x < width - 40) {
-        labels.push(
-          <text
-            key={`lx-${x}`}
-            x={x}
-            y={height - 12}
-            className="tsp-visualizer__axis-label"
-          >
-            {x}
-          </text>
+    for (let val = 0; val <= gridMax; val += step) {
+      const px = scaleX(val);
+      const py = scaleY(val);
+
+      if (val > 0 && val < gridMax) {
+        lines.push(
+          <line
+            key={`v-${val}`}
+            x1={px}
+            y1={scaleY(gridMax)}
+            x2={px}
+            y2={scaleY(0)}
+            className="tsp-visualizer__grid-line"
+          />
+        );
+        lines.push(
+          <line
+            key={`h-${val}`}
+            x1={scaleX(0)}
+            y1={py}
+            x2={scaleX(gridMax)}
+            y2={py}
+            className="tsp-visualizer__grid-line"
+          />
         );
       }
-    }
 
-    for (let y = gridStep; y < height; y += gridStep) {
-      const invertedY = height - y;
-      lines.push(
-        <line
-          key={`h-${y}`}
-          x1={0}
-          y1={invertedY}
-          x2={width}
-          y2={invertedY}
-          className="tsp-visualizer__grid-line"
-        />
-      );
-      if (y % 80 === 0 && y < height - 40) {
+      if (val % 20 === 0) {
         labels.push(
-          <text
-            key={`ly-${y}`}
-            x={15}
-            y={invertedY + 4}
-            className="tsp-visualizer__axis-label"
-          >
-            {y}
+          <text key={`lx-${val}`} x={px} y={originY + 20} className="tsp-visualizer__axis-label" textAnchor="middle">
+            {val}
+          </text>
+        );
+        labels.push(
+          <text key={`ly-${val}`} x={originX - 15} y={py + 4} className="tsp-visualizer__axis-label" textAnchor="end">
+            {val}
           </text>
         );
       }
@@ -72,76 +96,58 @@ export const TSPVisualizer = ({
 
     const axes = (
       <g className="tsp-visualizer__main-axes">
-        <line
-          x1={originX}
-          y1={originY}
-          x2={width - 20}
-          y2={originY}
-          className="tsp-visualizer__axis"
-        />
+        <line x1={scaleX(0)} y1={originY} x2={scaleX(gridMax) + 20} y2={originY} className="tsp-visualizer__axis" />
         <polygon
-          points={`${width - 15},${originY} ${width - 25},${originY - 4} ${width - 25},${originY + 4}`}
+          points={`${scaleX(gridMax) + 20},${originY} ${scaleX(gridMax) + 10},${originY - 4} ${scaleX(gridMax) + 10},${originY + 4}`}
           className="tsp-visualizer__arrow"
         />
-        <text x={width - 12} y={originY + 4} className="tsp-visualizer__axis-name">
-          X
-        </text>
+        <text x={scaleX(gridMax) + 25} y={originY + 4} className="tsp-visualizer__axis-name">X</text>
 
-        <line
-          x1={originX}
-          y1={originY}
-          x2={originX}
-          y2={20}
-          className="tsp-visualizer__axis"
-        />
+        <line x1={originX} y1={scaleY(0)} x2={originX} y2={scaleY(gridMax) - 20} className="tsp-visualizer__axis" />
         <polygon
-          points={`${originX},15 ${originX - 4},25 ${originX + 4},25`}
+          points={`${originX},${scaleY(gridMax) - 20} ${originX - 4},${scaleY(gridMax) - 10} ${originX + 4},${scaleY(gridMax) - 10}`}
           className="tsp-visualizer__arrow"
         />
-        <text x={originX - 4} y={10} className="tsp-visualizer__axis-name">
-          Y
-        </text>
+        <text x={originX - 4} y={scaleY(gridMax) - 25} className="tsp-visualizer__axis-name">Y</text>
       </g>
     );
 
     return { gridLines: lines, axisLines: axes, axisLabels: labels };
-  }, [width, height, gridStep, originX, originY]);
-
+  }, [width, height, graphWidth, graphHeight, originX, originY]);
 
   const pathSegments = useMemo(() => {
-    if (!cities.length || currentPath.length < 2) return [];
+    if (!normalizedCities.length || currentPath.length < 2) return [];
 
     const segments = [];
     for (let i = 0; i < currentPath.length; i++) {
       const fromIndex = currentPath[i];
       const toIndex = currentPath[(i + 1) % currentPath.length];
 
-      const cityA = cities[fromIndex];
-      const cityB = cities[toIndex];
+      const cityA = normalizedCities[fromIndex];
+      const cityB = normalizedCities[toIndex];
 
       if (!cityA || !cityB) continue;
 
-      const dx = cityB.x - cityA.x;
-      const dy = cityB.y - cityA.y;
+      const dx = cityB.originalX - cityA.originalX;
+      const dy = cityB.originalY - cityA.originalY;
       const distance = Math.hypot(dx, dy);
 
-      const midX = (cityA.x + cityB.x) / 2;
-      const midY = (cityA.y + cityB.y) / 2;
+      const x1 = scaleX(cityA.gridX);
+      const y1 = scaleY(cityA.gridY);
+      const x2 = scaleX(cityB.gridX);
+      const y2 = scaleY(cityB.gridY);
 
       segments.push({
         id: `${fromIndex}-${toIndex}`,
-        x1: cityA.x,
-        y1: cityA.y,
-        x2: cityB.x,
-        y2: cityB.y,
-        midX,
-        midY,
+        x1, y1, x2, y2,
+        midX: (x1 + x2) / 2,
+        midY: (y1 + y2) / 2,
         distance: distance.toFixed(1),
       });
     }
 
     return segments;
-  }, [cities, currentPath]);
+  }, [normalizedCities, currentPath]);
 
   return (
     <div className="tsp-visualizer">
@@ -150,10 +156,7 @@ export const TSPVisualizer = ({
         viewBox={`0 0 ${width} ${height}`}
         preserveAspectRatio="xMidYMid meet"
         onClick={(e) => {
-          if (
-            e.target.tagName === "svg" ||
-            e.target.classList.contains("tsp-visualizer__bg")
-          ) {
+          if (e.target.tagName === "svg" || e.target.classList.contains("tsp-visualizer__bg")) {
             setSelectedCityId(null);
           }
           if (onCanvasClick) onCanvasClick(e);
@@ -165,47 +168,25 @@ export const TSPVisualizer = ({
         {axisLines}
         <g className="tsp-visualizer__axes-labels">{axisLabels}</g>
 
-        {/* Отрезки маршрута (без стрелок, чистые линии) */}
         <g className="tsp-visualizer__routes">
           {pathSegments.map((segment) => {
             const isHovered = hoveredSegment === segment.id;
-
             return (
               <g key={segment.id}>
                 <line
-                  x1={segment.x1}
-                  y1={segment.y1}
-                  x2={segment.x2}
-                  y2={segment.y2}
+                  x1={segment.x1} y1={segment.y1} x2={segment.x2} y2={segment.y2}
                   className="tsp-visualizer__route-hitbox"
                   onMouseEnter={() => setHoveredSegment(segment.id)}
                   onMouseLeave={() => setHoveredSegment(null)}
                 />
                 <line
-                  x1={segment.x1}
-                  y1={segment.y1}
-                  x2={segment.x2}
-                  y2={segment.y2}
-                  className={`tsp-visualizer__route-line ${
-                    isHovered ? "is-hovered" : ""
-                  }`}
+                  x1={segment.x1} y1={segment.y1} x2={segment.x2} y2={segment.y2}
+                  className={`tsp-visualizer__route-line ${isHovered ? "is-hovered" : ""}`}
                 />
                 {isHovered && (
-                  <g
-                    className="tsp-visualizer__distance-badge"
-                    transform={`translate(${segment.midX}, ${segment.midY})`}
-                  >
-                    <rect
-                      x="-24"
-                      y="-10"
-                      width="48"
-                      height="20"
-                      rx="4"
-                      className="tsp-visualizer__badge-bg"
-                    />
-                    <text x="0" y="3" className="tsp-visualizer__badge-text">
-                      {segment.distance}
-                    </text>
+                  <g className="tsp-visualizer__distance-badge" transform={`translate(${segment.midX}, ${segment.midY})`}>
+                    <rect x="-24" y="-10" width="48" height="20" rx="4" className="tsp-visualizer__badge-bg" />
+                    <text x="0" y="3" className="tsp-visualizer__badge-text">{segment.distance}</text>
                   </g>
                 )}
               </g>
@@ -213,61 +194,30 @@ export const TSPVisualizer = ({
           })}
         </g>
 
-   
-        {cities.map((city, index) => {
+        {normalizedCities.map((city, index) => {
           const cityIndex = index + 1;
           const isSelected = selectedCityId === city.id;
+          const cx = scaleX(city.gridX);
+          const cy = scaleY(city.gridY);
 
           return (
             <g
               key={city.id ?? index}
-              className={`tsp-visualizer__city-group ${
-                isSelected ? "is-selected" : ""
-              }`}
+              className={`tsp-visualizer__city-group ${isSelected ? "is-selected" : ""}`}
               onClick={(e) => {
                 e.stopPropagation();
                 setSelectedCityId(isSelected ? null : city.id);
               }}
             >
-              {index === 0 && (
-                <circle
-                  cx={city.x}
-                  cy={city.y}
-                  r={12}
-                  className="tsp-visualizer__city-start"
-                />
-              )}
-              <circle
-                cx={city.x}
-                cy={city.y}
-                r={isSelected ? 7 : 5}
-                className={`tsp-visualizer__city-node ${
-                  isSelected ? "is-selected" : ""
-                }`}
-              />
-              <text
-                x={city.x}
-                y={city.y - 12}
-                className="tsp-visualizer__city-label"
-              >
-                {cityIndex}
-              </text>
+              {index === 0 && <circle cx={cx} cy={cy} r={12} className="tsp-visualizer__city-start" />}
+              <circle cx={cx} cy={cy} r={isSelected ? 7 : 5} className={`tsp-visualizer__city-node ${isSelected ? "is-selected" : ""}`} />
+              <text x={cx} y={cy - 12} className="tsp-visualizer__city-label">{cityIndex}</text>
 
               {isSelected && (
-                <g
-                  className="tsp-visualizer__coord-badge"
-                  transform={`translate(${city.x}, ${city.y + 18})`}
-                >
-                  <rect
-                    x="-32"
-                    y="-9"
-                    width="64"
-                    height="18"
-                    rx="3"
-                    className="tsp-visualizer__badge-bg"
-                  />
+                <g className="tsp-visualizer__coord-badge" transform={`translate(${cx}, ${cy + 18})`}>
+                  <rect x="-40" y="-9" width="80" height="18" rx="3" className="tsp-visualizer__badge-bg" />
                   <text x="0" y="3" className="tsp-visualizer__badge-text">
-                    {city.x}, {height - city.y}
+                    {Math.round(city.originalX)}, {Math.round(city.originalY)}
                   </text>
                 </g>
               )}
