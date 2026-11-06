@@ -1,0 +1,126 @@
+.tsp-visualizer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--TDarkGray);
+  overflow: hidden;
+
+  &__canvas {
+    width: 100%;
+    height: 100%;
+    max-height: 80vh;
+    cursor: crosshair;
+  }
+
+  &__bg {
+    fill: var(--TDarkGray);
+  }
+
+  &__grid-line {
+    stroke: var(--TWhite);
+    stroke-width: 1;
+    opacity: 0.15;
+    pointer-events: none;
+  }
+
+  &__axis {
+    stroke: var(--TWhite);
+    stroke-width: 1.5;
+
+  }
+
+  &__arrow {
+    fill: var(--TWhite);
+  }
+
+  &__axis-name {
+    fill: var(--TWhite);
+
+    user-select: none;
+    pointer-events: none;
+  }
+
+  &__axis-label {
+    fill: var(--TWhite);
+    font-size: 12px;
+    opacity: 0.5;
+    text-anchor: middle;
+    user-select: none;
+    pointer-events: none;
+  }
+
+  &__route-hitbox {
+    stroke: transparent;
+    stroke-width: 12;
+    cursor: pointer;
+  }
+
+  &__route-line {
+    fill: none;
+    stroke: var(--TWhite);
+    stroke-width: 2;
+    stroke-linecap: round;
+    opacity: 0.7;
+    transition: stroke 0.2s ease, opacity 0.2s ease, stroke-width 0.2s ease;
+    pointer-events: none;
+
+    &.is-hovered {
+      stroke-width: 3.5;
+      opacity: 1;
+    }
+  }
+
+  &__badge-bg {
+    fill: var(--TBlack);
+    stroke: var(--TWhite);
+    stroke-width: 1.5;
+  }
+
+  &__badge-text {
+    fill: var(--TWhite);
+    font-size: 12px;
+    font-weight: bold;
+    text-anchor: middle;
+    user-select: none;
+    pointer-events: none;
+  }
+
+  &__city-group {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+
+  &__city-node {
+    fill: var(--TBlack);
+    stroke: var(--TWhite);
+    stroke-width: 2;
+    transition: r 0.2s ease, stroke 0.2s ease;
+
+    &.is-selected {
+      stroke: var(--TWhite);
+      stroke-width: 3;
+    }
+  }
+
+  &__city-start {
+    fill: none;
+    stroke: var(--TWhite);
+    stroke-width: 1.5;
+    stroke-dasharray: 3, 3;
+    opacity: 0.7;
+  }
+
+  &__city-label {
+    fill: var(--TWhite);
+    font-size: 12px;
+    text-anchor: middle;
+    user-select: none;
+    pointer-events: none;
+  }
+
+  &__coord-badge {
+    pointer-events: none;
+  }
+}
