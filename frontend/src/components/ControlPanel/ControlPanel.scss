@@ -35,17 +35,19 @@
   .panel-actions {
     display: flex;
     flex-direction: row;
+    justify-content: flex-start;
     flex-wrap: wrap;
-    gap: 16px;
+    gap: 12px;
 
     button {
-      flex: 1;
-      min-width: 120px;
+      flex: 0 0 auto;
+      min-width: 110px;
+      width: auto;
     }
   }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 800px) {
   .control-panel {
     order: 1;
     width: 100%;
