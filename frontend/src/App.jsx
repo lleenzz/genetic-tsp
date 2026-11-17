@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import ControlPanel from "./components/ControlPanel/ControlPanel";
 import TSPVisualizer from "./components/TSPVisualizer/TSPVisualizer";
+import AlgorithmHistory from "./components/AlgorithmHistory/AlgorithmHistory";
+import "./App.scss";
 
 const generateRandomCities = (
   count,
   width = 800,
   height = 600,
-  padding = 50
+  padding = 50,
 ) => {
   return Array.from({ length: count }, (_, index) => ({
     id: index,
@@ -29,6 +31,7 @@ function App() {
   const [isRunning, setIsRunning] = useState(false);
   const [bestLength, setBestLength] = useState(null);
   const [currentGenIndex, setCurrentGenIndex] = useState(0);
+  const [history, setHistory] = useState([]);
 
   const wsRef = useRef(null);
 
@@ -54,7 +57,6 @@ function App() {
     setSettings((prev) => ({ ...prev, [key]: value }));
   };
 
-
   const handleRun = () => {
     if (wsRef.current) {
       wsRef.current.close();
@@ -63,6 +65,7 @@ function App() {
     setIsRunning(true);
     setCurrentGenIndex(0);
     setBestLength(null);
+    setHistory([]);
 
     const ws = new WebSocket("ws://localhost:8000/ws/solve");
     wsRef.current = ws;
@@ -75,7 +78,7 @@ function App() {
           generations: settings.generations,
           mutation_rate: settings.mutationRate,
           seed: settings.seed,
-        })
+        }),
       );
     };
 
@@ -87,10 +90,12 @@ function App() {
         setCurrentPath(data.route);
         setBestLength(data.length);
         setCurrentGenIndex(data.generation);
+        setHistory(data.history ?? []);
       } else if (data.type === "update" || data.type === "done") {
         setCurrentPath(data.route);
         setBestLength(data.length);
         setCurrentGenIndex(data.generation);
+        setHistory(data.history ?? []);
 
         if (data.type === "done") {
           setIsRunning(false);
@@ -113,9 +118,12 @@ function App() {
     if (wsRef.current) {
       wsRef.current.close();
     }
+
     setIsRunning(false);
     setCurrentGenIndex(0);
     setBestLength(null);
+    setHistory([]);
+
     setSettings({
       citiesCount: 25,
       populationSize: 200,
@@ -128,15 +136,7 @@ function App() {
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        height: "100vh",
-        width: "100vw",
-        overflow: "hidden",
-        backgroundColor: "var(--TBlack)",
-      }}
-    >
+    <div className="app-layout">
       <ControlPanel
         settings={settings}
         onChange={handleSettingChange}
@@ -144,45 +144,32 @@ function App() {
         onReset={handleReset}
       />
 
-      <main
-        style={{
-          flex: 1,
-          backgroundColor: "var(--TBlack)",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          boxSizing: "border-box",
-          position: "relative",
-        }}
-      >
-        <div
-          style={{
-            position: "absolute",
-            top: "20px",
-            color: "var(--TWhite)",
-            fontFamily: "monospace",
-            fontSize: "16px",
-            opacity: 0.8,
-            display: "flex",
-            gap: "20px",
-          }}
-        >
+      <main className="app-main">
+        <div className="app-stats">
           <div>
-            Поколение: <strong>{currentGenIndex} / {settings.generations}</strong>
+            Поколение:{" "}
+            <strong>
+              {currentGenIndex} / {settings.generations}
+            </strong>
           </div>
+
           <div>
-            Длина пути: <strong>{bestLength !== null ? bestLength : "—"}</strong>
+            Длина пути:{" "}
+            <strong>{bestLength !== null ? bestLength : "—"}</strong>
           </div>
         </div>
 
-        <TSPVisualizer
-          cities={cities}
-          currentPath={currentPath}
-          width={800}
-          height={600}
-        />
+        <div className="app-visualizer">
+          <TSPVisualizer
+            cities={cities}
+            currentPath={currentPath}
+            width={800}
+            height={600}
+          />
+        </div>
       </main>
+
+      <AlgorithmHistory history={history} />
     </div>
   );
 }
