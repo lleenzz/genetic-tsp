@@ -23,7 +23,7 @@ const AlgorithmHistory = ({ history = [] }) => {
     const width = 380;
     const height = 190;
 
-    const left = 65;
+    const left = 70;
     const right = 28;
     const top = 18;
     const bottom = 48;
