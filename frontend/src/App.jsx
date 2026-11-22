@@ -146,16 +146,20 @@ function App() {
 
       <main className="app-main">
         <div className="app-stats">
-          <div>
-            Поколение:{" "}
-            <strong>
-              {currentGenIndex} / {settings.generations}
-            </strong>
-          </div>
+          <h2 className="app-title">Визуализация алгоритма</h2>
 
-          <div>
-            Длина пути:{" "}
-            <strong>{bestLength !== null ? bestLength : "—"}</strong>
+          <div className="app-stats__values">
+            <h4>
+              Поколение:{" "}
+              <strong>
+                {currentGenIndex} / {settings.generations}
+              </strong>
+            </h4>
+
+            <h4>
+              Длина пути:{" "}
+              <strong>{bestLength !== null ? bestLength : "—"}</strong>
+            </h4>
           </div>
         </div>
 

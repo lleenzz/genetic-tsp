@@ -61,7 +61,7 @@
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     align-items: center;
     gap: 12px;
-    padding: 9px 12px;
+    padding: 8px 12px;
 
     span {
       min-width: 0;
@@ -120,8 +120,8 @@
     min-width: 0;
     min-height: 0;
     height: auto;
-    align-self: start;
-    flex: initial;
+    align-self: stretch;
+
     display: flex;
     flex-direction: column;
     gap: 8px;

@@ -20,8 +20,10 @@ export const TSPVisualizer = ({
   const normalizedCities = useMemo(() => {
     if (!cities.length) return [];
 
-    let minX = Infinity, maxX = -Infinity;
-    let minY = Infinity, maxY = -Infinity;
+    let minX = Infinity,
+      maxX = -Infinity;
+    let minY = Infinity,
+      maxY = -Infinity;
 
     cities.forEach((c) => {
       if (c.x < minX) minX = c.x;
@@ -66,7 +68,7 @@ export const TSPVisualizer = ({
             x2={px}
             y2={scaleY(0)}
             className="tsp-visualizer__grid-line"
-          />
+          />,
         );
         lines.push(
           <line
@@ -76,39 +78,75 @@ export const TSPVisualizer = ({
             x2={scaleX(gridMax)}
             y2={py}
             className="tsp-visualizer__grid-line"
-          />
+          />,
         );
       }
 
       if (val % 20 === 0) {
         labels.push(
-          <text key={`lx-${val}`} x={px} y={originY + 20} className="tsp-visualizer__axis-label" textAnchor="middle">
+          <text
+            key={`lx-${val}`}
+            x={px}
+            y={originY + 20}
+            className="tsp-visualizer__axis-label"
+            textAnchor="middle"
+          >
             {val}
-          </text>
+          </text>,
         );
         labels.push(
-          <text key={`ly-${val}`} x={originX - 15} y={py + 4} className="tsp-visualizer__axis-label" textAnchor="end">
+          <text
+            key={`ly-${val}`}
+            x={originX - 15}
+            y={py + 4}
+            className="tsp-visualizer__axis-label"
+            textAnchor="end"
+          >
             {val}
-          </text>
+          </text>,
         );
       }
     }
 
     const axes = (
       <g className="tsp-visualizer__main-axes">
-        <line x1={scaleX(0)} y1={originY} x2={scaleX(gridMax) + 20} y2={originY} className="tsp-visualizer__axis" />
+        <line
+          x1={scaleX(0)}
+          y1={originY}
+          x2={scaleX(gridMax) + 20}
+          y2={originY}
+          className="tsp-visualizer__axis"
+        />
         <polygon
           points={`${scaleX(gridMax) + 20},${originY} ${scaleX(gridMax) + 10},${originY - 4} ${scaleX(gridMax) + 10},${originY + 4}`}
           className="tsp-visualizer__arrow"
         />
-        <text x={scaleX(gridMax) + 25} y={originY + 4} className="tsp-visualizer__axis-name">X</text>
+        <text
+          x={scaleX(gridMax) + 25}
+          y={originY + 4}
+          className="tsp-visualizer__axis-name"
+        >
+          X
+        </text>
 
-        <line x1={originX} y1={scaleY(0)} x2={originX} y2={scaleY(gridMax) - 20} className="tsp-visualizer__axis" />
+        <line
+          x1={originX}
+          y1={scaleY(0)}
+          x2={originX}
+          y2={scaleY(gridMax) - 20}
+          className="tsp-visualizer__axis"
+        />
         <polygon
           points={`${originX},${scaleY(gridMax) - 20} ${originX - 4},${scaleY(gridMax) - 10} ${originX + 4},${scaleY(gridMax) - 10}`}
           className="tsp-visualizer__arrow"
         />
-        <text x={originX - 4} y={scaleY(gridMax) - 25} className="tsp-visualizer__axis-name">Y</text>
+        <text
+          x={originX - 4}
+          y={scaleY(gridMax) - 25}
+          className="tsp-visualizer__axis-name"
+        >
+          Y
+        </text>
       </g>
     );
 
@@ -139,7 +177,10 @@ export const TSPVisualizer = ({
 
       segments.push({
         id: `${fromIndex}-${toIndex}`,
-        x1, y1, x2, y2,
+        x1,
+        y1,
+        x2,
+        y2,
         midX: (x1 + x2) / 2,
         midY: (y1 + y2) / 2,
         distance: distance.toFixed(1),
@@ -156,7 +197,10 @@ export const TSPVisualizer = ({
         viewBox={`0 0 ${width} ${height}`}
         preserveAspectRatio="xMidYMid meet"
         onClick={(e) => {
-          if (e.target.tagName === "svg" || e.target.classList.contains("tsp-visualizer__bg")) {
+          if (
+            e.target.tagName === "svg" ||
+            e.target.classList.contains("tsp-visualizer__bg")
+          ) {
             setSelectedCityId(null);
           }
           if (onCanvasClick) onCanvasClick(e);
@@ -174,19 +218,37 @@ export const TSPVisualizer = ({
             return (
               <g key={segment.id}>
                 <line
-                  x1={segment.x1} y1={segment.y1} x2={segment.x2} y2={segment.y2}
+                  x1={segment.x1}
+                  y1={segment.y1}
+                  x2={segment.x2}
+                  y2={segment.y2}
                   className="tsp-visualizer__route-hitbox"
                   onMouseEnter={() => setHoveredSegment(segment.id)}
                   onMouseLeave={() => setHoveredSegment(null)}
                 />
                 <line
-                  x1={segment.x1} y1={segment.y1} x2={segment.x2} y2={segment.y2}
+                  x1={segment.x1}
+                  y1={segment.y1}
+                  x2={segment.x2}
+                  y2={segment.y2}
                   className={`tsp-visualizer__route-line ${isHovered ? "is-hovered" : ""}`}
                 />
                 {isHovered && (
-                  <g className="tsp-visualizer__distance-badge" transform={`translate(${segment.midX}, ${segment.midY})`}>
-                    <rect x="-24" y="-10" width="48" height="20" rx="4" className="tsp-visualizer__badge-bg" />
-                    <text x="0" y="3" className="tsp-visualizer__badge-text">{segment.distance}</text>
+                  <g
+                    className="tsp-visualizer__distance-badge"
+                    transform={`translate(${segment.midX}, ${segment.midY})`}
+                  >
+                    <rect
+                      x="-24"
+                      y="-10"
+                      width="48"
+                      height="20"
+                      rx="4"
+                      className="tsp-visualizer__badge-bg"
+                    />
+                    <text x="0" y="3" className="tsp-visualizer__badge-text">
+                      {segment.distance}
+                    </text>
                   </g>
                 )}
               </g>
@@ -209,13 +271,37 @@ export const TSPVisualizer = ({
                 setSelectedCityId(isSelected ? null : city.id);
               }}
             >
-              {index === 0 && <circle cx={cx} cy={cy} r={12} className="tsp-visualizer__city-start" />}
-              <circle cx={cx} cy={cy} r={isSelected ? 7 : 5} className={`tsp-visualizer__city-node ${isSelected ? "is-selected" : ""}`} />
-              <text x={cx} y={cy - 12} className="tsp-visualizer__city-label">{cityIndex}</text>
+              {index === 0 && (
+                <circle
+                  cx={cx}
+                  cy={cy}
+                  r={12}
+                  className="tsp-visualizer__city-start"
+                />
+              )}
+              <circle
+                cx={cx}
+                cy={cy}
+                r={isSelected ? 7 : 5}
+                className={`tsp-visualizer__city-node ${isSelected ? "is-selected" : ""}`}
+              />
+              <text x={cx} y={cy - 12} className="tsp-visualizer__city-label">
+                {cityIndex}
+              </text>
 
               {isSelected && (
-                <g className="tsp-visualizer__coord-badge" transform={`translate(${cx}, ${cy + 18})`}>
-                  <rect x="-40" y="-9" width="80" height="18" rx="3" className="tsp-visualizer__badge-bg" />
+                <g
+                  className="tsp-visualizer__coord-badge"
+                  transform={`translate(${cx}, ${cy + 18})`}
+                >
+                  <rect
+                    x="-40"
+                    y="-9"
+                    width="80"
+                    height="18"
+                    rx="3"
+                    className="tsp-visualizer__badge-bg"
+                  />
                   <text x="0" y="3" className="tsp-visualizer__badge-text">
                     {Math.round(city.originalX)}, {Math.round(city.originalY)}
                   </text>
