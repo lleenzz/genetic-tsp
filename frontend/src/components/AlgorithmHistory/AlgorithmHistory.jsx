@@ -1,14 +1,53 @@
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import "./AlgorithmHistory.scss";
 
 const AlgorithmHistory = ({ history = [] }) => {
   const tableRef = useRef(null);
+  const chartRef = useRef(null);
+
+  const [chartSize, setChartSize] = useState({
+    width: 380,
+    height: 190,
+  });
 
   useEffect(() => {
     if (tableRef.current) {
       tableRef.current.scrollTop = tableRef.current.scrollHeight;
     }
   }, [history.length]);
+
+  // Автоматически определяем доступный размер области графика.
+  useEffect(() => {
+    const element = chartRef.current;
+
+    if (!element || typeof ResizeObserver === "undefined") return;
+
+    const observer = new ResizeObserver((entries) => {
+      const { width, height } = entries[0].contentRect;
+
+      const nextSize = {
+        width: Math.round(width),
+        height: Math.round(height),
+      };
+
+      if (nextSize.width <= 0 || nextSize.height <= 0) return;
+
+      setChartSize((previous) => {
+        if (
+          previous.width === nextSize.width &&
+          previous.height === nextSize.height
+        ) {
+          return previous;
+        }
+
+        return nextSize;
+      });
+    });
+
+    observer.observe(element);
+
+    return () => observer.disconnect();
+  }, []);
 
   const values = useMemo(
     () => history.map(Number).filter(Number.isFinite),
@@ -20,13 +59,16 @@ const AlgorithmHistory = ({ history = [] }) => {
   const chart = useMemo(() => {
     if (!values.length) return null;
 
-    const width = 380;
-    const height = 190;
+    const { width, height } = chartSize;
 
-    const left = 70;
-    const right = 28;
-    const top = 18;
-    const bottom = 48;
+    // Поля графика подстраиваются под его реальные размеры.
+    const left = Math.min(76, Math.max(56, width * 0.2));
+    const rightMargin = Math.min(28, Math.max(20, width * 0.07));
+    const right = width - rightMargin;
+
+    const top = Math.min(18, Math.max(12, height * 0.08));
+    const bottomMargin = Math.min(48, Math.max(38, height * 0.24));
+    const bottom = height - bottomMargin;
 
     const minValue = Math.min(...values);
     const maxValue = Math.max(...values);
@@ -61,8 +103,8 @@ const AlgorithmHistory = ({ history = [] }) => {
     const axisMin = Math.floor(dataMin / niceStep) * niceStep;
     const axisMax = Math.ceil(dataMax / niceStep) * niceStep;
 
-    const plotWidth = width - left - right;
-    const plotHeight = height - top - bottom;
+    const plotWidth = right - left;
+    const plotHeight = bottom - top;
 
     const points = values.map((value, index) => {
       const x =
@@ -105,11 +147,13 @@ const AlgorithmHistory = ({ history = [] }) => {
       yTicks,
       xTicks,
       left,
-      right: width - right,
+      right,
       top,
-      bottom: height - bottom,
+      bottom,
+      width,
+      height,
     };
-  }, [values]);
+  }, [values, chartSize]);
 
   return (
     <aside className="algorithm-history">
@@ -151,14 +195,14 @@ const AlgorithmHistory = ({ history = [] }) => {
 
         <h4 className="algorithm-history__section-title">График сходимости</h4>
 
-        <div className="algorithm-history__chart">
+        <div className="algorithm-history__chart" ref={chartRef}>
           {!chart ? (
             <div className="algorithm-history__chart-empty">
               График появится после запуска алгоритма
             </div>
           ) : (
             <svg
-              viewBox="0 0 380 190"
+              viewBox={`0 0 ${chart.width} ${chart.height}`}
               className="algorithm-history__chart-svg"
               role="img"
               aria-label="График изменения лучшей длины маршрута по поколениям"
@@ -189,7 +233,7 @@ const AlgorithmHistory = ({ history = [] }) => {
                   />
 
                   <text
-                    x={chart.left - 10}
+                    x={chart.left - 8}
                     y={tick.y + 4}
                     textAnchor="end"
                     className="algorithm-history__chart-tick"
@@ -221,10 +265,10 @@ const AlgorithmHistory = ({ history = [] }) => {
 
               {/* Подпись вертикальной оси */}
               <text
-                x="15"
+                x={chart.left * 0.5}
                 y={(chart.top + chart.bottom) / 2}
                 textAnchor="middle"
-                transform={`rotate(-90 15 ${(chart.top + chart.bottom) / 2})`}
+                transform={`rotate(-90 ${chart.left * 0.35} ${(chart.top + chart.bottom) / 2 + 12})`}
                 className="algorithm-history__chart-axis-label"
               >
                 Длина маршрута
@@ -261,7 +305,7 @@ const AlgorithmHistory = ({ history = [] }) => {
               {/* Подпись горизонтальной оси */}
               <text
                 x={(chart.left + chart.right) / 2}
-                y="186"
+                y={chart.height - 4}
                 textAnchor="middle"
                 className="algorithm-history__chart-axis-label"
               >
