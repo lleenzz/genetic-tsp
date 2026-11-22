@@ -146,7 +146,9 @@ function App() {
 
       <main className="app-main">
         <div className="app-stats">
-          <h2 className="app-title">Визуализация алгоритма</h2>
+          <h2 className="app-title">Визуализация генетического алгоритма</h2>
+
+          <p className="app-subtitle">Решение задачи коммивояжёра (TSP)</p>
 
           <div className="app-stats__values">
             <h4>
